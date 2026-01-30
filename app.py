@@ -5,7 +5,7 @@ import io
 
 # --- CONFIGURAÇÃO DO SUPABASE ---
 # Substitui com os dados que copiaste do teu painel API
-SUPABASE_URL = "https://pfpfdlugehsbqxwkgyj.supabase.co"
+SUPABASE_URL = "https://pfpfpdlugehsbqxwkgyj.supabase.co"
 SUPABASE_KEY = "sb_publishable_NSDC9o5fCW2AxTnS_ZEjtw_358GaFpI"
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
@@ -89,4 +89,5 @@ with tab_imp:
                 # passando os links: encontrados[i]['imagem_url']
         else:
             st.error("Introduza pelo menos um código.")
+
 
