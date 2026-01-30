@@ -1,4 +1,4 @@
-import streamlit as st
+ueimport streamlit as st
 from supabase import create_client, Client
 from PIL import Image, ImageDraw, ImageFont
 import requests
@@ -94,12 +94,12 @@ with st.sidebar:
         # Caso o ficheiro não exista, usa um ícone de backup
         st.image("https://img.icons8.com/clouds/200/energy-usage.png", width=100)
     
-    st.title("SIRIUS Cloud")
+    st.title("Projeto EcoPrint Mobile")
     
     # Sistema de Login (Modo Admin)
     if not st.session_state.admin_mode:
-        pwd = st.text_input("Password Admin", type="password")
-        if st.button("Ativar Modo Edição"):
+        pwd = st.text_input("Introduza a password", type="password")
+        if st.button("Modo Administrativo"):
             check_login(pwd)
     else:
         st.success("🔓 Modo Admin Ativo")
@@ -166,6 +166,7 @@ if st.session_state.admin_mode:
                     if upload_para_nuvem(img_n, cod_n):
                         st.success("Etiqueta gravada com sucesso!")
                         st.rerun()
+
 
 
 
