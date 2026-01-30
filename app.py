@@ -119,7 +119,7 @@ with st.sidebar:
         except:
             st.image("https://img.icons8.com/clouds/200/energy-usage.png", width=100)
     
-    st.title("Projeto EcoPrint Mobile")
+    st.title("Projeto EcoPrint")
     
     # Sistema de Login (Modo Admin)
     if not st.session_state.admin_mode:
@@ -191,6 +191,7 @@ if st.session_state.admin_mode:
                     if upload_para_nuvem(img_n, cod_n):
                         st.success("Etiqueta gravada com sucesso!")
                         st.rerun()
+
 
 
 
