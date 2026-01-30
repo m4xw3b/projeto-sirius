@@ -13,19 +13,57 @@ SUPABASE_KEY = "sb_publishable_NSDC9o5fCW2AxTnS_ZEjtw_358GaFpI"
 # Inicializa o cliente Supabase
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# --- 2. FUNÇÕES DE SUPORTE (LÓGICA) ---
+# --- 2. ESTILO CSS PERSONALIZADO ---
+def aplicar_design():
+    st.markdown("""
+        <style>
+        /* Fundo da aplicação */
+        .stApp {
+            background-color: #f8f9fa;
+        }
+        /* Estilização dos botões */
+        .stButton>button {
+            width: 100%;
+            border-radius: 8px;
+            height: 3em;
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+            border: none;
+            transition: 0.3s;
+        }
+        .stButton>button:hover {
+            background-color: #0056b3;
+            border: none;
+        }
+        /* Estilização dos inputs e containers */
+        .stTextInput>div>div>input {
+            border-radius: 8px;
+        }
+        div[data-testid="stExpander"] {
+            border-radius: 10px;
+            background-color: white;
+            border: 1px solid #e0e0e0;
+        }
+        /* Sidebar (Menu Lateral) */
+        [data-testid="stSidebar"] {
+            background-color: #ffffff;
+            border-right: 1px solid #eee;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+# --- 3. LÓGICA DE NEGÓCIO ---
 
 def criar_folha_a4_cloud(lista_dados):
-    """Monta a folha A4 usando URLs da nuvem."""
     largura_a4, altura_a4 = 3508, 2480
     dpi = 300
     largura_px = int((6.5 / 2.54) * dpi)
     altura_px = int((13.5 / 2.54) * dpi)
-    margem_e_espaco = 150
-
+    
     folha = Image.new('RGB', (largura_a4, altura_a4), 'white')
     desenho = ImageDraw.Draw(folha)
-
+    
     try:
         fonte = ImageFont.truetype("arial.ttf", 60)
     except:
@@ -33,108 +71,92 @@ def criar_folha_a4_cloud(lista_dados):
 
     for i, item in enumerate(lista_dados):
         try:
-            # item['imagem_url'] vem da base de dados
             response = requests.get(item['imagem_url'])
             img = Image.open(BytesIO(response.content)).convert("RGB").resize((largura_px, altura_px))
             
-            pos_x = margem_e_espaco + (i * (largura_px + 100))
+            pos_x = 150 + (i * (largura_px + 100))
             pos_y = (altura_a4 - altura_px) // 2
             
             folha.paste(img, (pos_x, pos_y))
-            
-            texto_y = pos_y + altura_px + 40
-            desenho.text((pos_x + 50, texto_y), f"SIRIUS: {item['codigo']}", fill="black", font=fonte)
-        except Exception as e:
-            st.error(f"Erro ao processar imagem {i+1}: {e}")
+            desenho.text((pos_x + 50, pos_y + altura_px + 40), f"SIRIUS: {item['codigo']}", fill="black", font=fonte)
+        except:
+            continue
 
-    # Converte para bytes para o Streamlit permitir download
     buf = io.BytesIO()
     folha.save(buf, format="JPEG", quality=95)
     return buf.getvalue()
 
 def upload_para_nuvem(imagem_file, codigo):
-    """Faz o upload para o Storage e guarda o link na Tabela SQL."""
     try:
         nome_ficheiro = f"{codigo}.jpg"
         conteudo = imagem_file.getvalue()
-        
-        # Upload para o Bucket (imagens_sirius)
         supabase.storage.from_("imagens_sirius").upload(
             path=nome_ficheiro,
             file=conteudo,
             file_options={"content-type": "image/jpeg", "upsert": "true"}
         )
-        
-        # Obter URL pública
         url_publica = supabase.storage.from_("imagens_sirius").get_public_url(nome_ficheiro)
-        
-        # Inserir na tabela (etiquetas)
-        dados = {"codigo": codigo, "imagem_url": url_publica}
-        supabase.table("etiquetas").insert(dados).execute()
+        supabase.table("etiquetas").insert({"codigo": codigo, "imagem_url": url_publica}).execute()
         return url_publica
     except Exception as e:
-        st.error(f"Erro no processo de upload: {e}")
+        st.error(f"Erro no upload: {e}")
         return None
 
-# --- 3. INTERFACE UTILIZADOR (STREAMLIT) ---
+# --- 4. INTERFACE DO UTILIZADOR ---
 
-st.set_page_config(page_title="SIRIUS Cloud v2.0", layout="wide")
-st.title("🏷️ Sistema SIRIUS - Etiquetas Energéticas")
+aplicar_design()
 
-tab_reg, tab_imp = st.tabs(["📥 Registar Nova Etiqueta", "🖨️ Gerar Impressão A4"])
+# Barra Lateral (Menu)
+with st.sidebar:
+    st.image("https://img.icons8.com/clouds/200/database.png", width=100)
+    st.title("SIRIUS Cloud")
+    st.info("Sistema de Gestão de Etiquetas Energéticas v2.0")
+    st.divider()
+    st.write("🔧 **Status:** Conectado ao Supabase")
+    st.write("📅 **Data:** 2026")
 
-# ABA DE REGISTO
+# Conteúdo Principal
+st.title("🏷️ Gestão de Etiquetas Sirius")
+
+tab_reg, tab_imp = st.tabs(["📥 Novo Registo", "🖨️ Área de Impressão"])
+
 with tab_reg:
-    st.header("Upload para a Base de Dados")
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        cod_novo = st.text_input("Atribuir Código Sirius:", placeholder="Ex: 3988499")
-    with col2:
-        arq_novo = st.file_uploader("Selecionar Imagem:", type=['jpg', 'jpeg', 'png'])
+    with st.container():
+        st.markdown("### Carregar Etiqueta")
+        c1, c2 = st.columns([1, 2])
+        with c1:
+            cod_novo = st.text_input("Código Sirius", placeholder="Ex: 3988499")
+        with c2:
+            arq_novo = st.file_uploader("Upload da Imagem", type=['jpg', 'jpeg', 'png'])
         
-    if st.button("🚀 Gravar na Nuvem"):
-        if cod_novo and arq_novo:
-            with st.spinner("A processar e a guardar..."):
-                url_res = upload_para_nuvem(arq_novo, cod_novo)
-                if url_res:
-                    st.success(f"Etiqueta {cod_novo} guardada com sucesso!")
-                    st.image(url_res, width=300)
-        else:
-            st.warning("Por favor, preencha o código e selecione uma imagem.")
+        if st.button("Gravar na Base de Dados"):
+            if cod_novo and arq_novo:
+                with st.spinner("A enviar para a Cloud..."):
+                    url = upload_para_nuvem(arq_novo, cod_novo)
+                    if url:
+                        st.success(f"Registo {cod_novo} concluído!")
+                        st.image(url, width=200, caption="Imagem guardada na nuvem")
 
-# ABA DE IMPRESSÃO
 with tab_imp:
-    st.header("Consulta e Impressão")
-    st.write("Introduza até 3 códigos para montar a folha A4:")
+    st.markdown("### Montar Folha A4")
+    with st.expander("Instruções de Impressão", expanded=False):
+        st.write("Insira os códigos para gerar uma folha horizontal com até 3 etiquetas.")
     
-    c_a, c_b, c_c = st.columns(3)
-    with c_a: cod1 = st.text_input("Código 1", key="imp1")
-    with c_b: cod2 = st.text_input("Código 2", key="imp2")
-    with c_c: cod3 = st.text_input("Código 3", key="imp3")
+    col_a, col_b, col_c = st.columns(3)
+    with col_a: c1 = st.text_input("Código 1", key="i1")
+    with col_b: c2 = st.text_input("Código 2", key="i2")
+    with col_c: c3 = st.text_input("Código 3", key="i3")
     
-    codigos_busca = [c.strip() for c in [cod1, cod2, cod3] if c.strip()]
+    cods = [c.strip() for c in [c1, c2, c3] if c.strip()]
     
-    if st.button("🔍 Gerar Folha para Impressão"):
-        if codigos_busca:
-            with st.spinner("A consultar base de dados e a montar folha..."):
-                dados_encontrados = []
-                for cb in codigos_busca:
-                    res = supabase.table("etiquetas").select("*").eq("codigo", cb).execute()
-                    if res.data:
-                        dados_encontrados.append(res.data[0])
-                    else:
-                        st.error(f"O código {cb} não foi encontrado na base de dados.")
-                
-                if dados_encontrados:
-                    folha_final = criar_folha_a4_cloud(dados_encontrados)
-                    st.image(folha_final, caption="Pré-visualização do A4", use_container_width=True)
-                    
-                    st.download_button(
-                        label="📥 Descarregar JPEG para Imprimir",
-                        data=folha_final,
-                        file_name="etiquetas_sirius_a4.jpg",
-                        mime="image/jpeg"
-                    )
-        else:
-            st.info("Introduza pelo menos um código válido.")
+    if st.button("🔍 Gerar Pré-visualização"):
+        if cods:
+            encontrados = []
+            for c in cods:
+                res = supabase.table("etiquetas").select("*").eq("codigo", c).execute()
+                if res.data: encontrados.append(res.data[0])
+            
+            if encontrados:
+                folha = criar_folha_a4_cloud(encontrados)
+                st.image(folha, caption="Visualização da Folha", use_container_width=True)
+                st.download_button("📥 Descarregar Folha para Impressão", data=folha, file_name="SIRIUS_A4.jpg", mime="image/jpeg")
