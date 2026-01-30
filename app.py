@@ -86,20 +86,30 @@ def criar_folha_a4_cloud(lista_dados):
 aplicar_design()
 
 with st.sidebar:
-    st.image("https://img.icons8.com/clouds/200/lock-landscape.png", width=80)
+    # 1. Tentar carregar o logo localmente
+    try:
+        logo = Image.open("logo.png")
+        st.image(logo, use_container_width=True)
+    except:
+        # Caso o ficheiro não exista, usa um ícone de backup
+        st.image("https://img.icons8.com/clouds/200/energy-usage.png", width=100)
+    
     st.title("SIRIUS Cloud")
+    
+    # Sistema de Login (Modo Admin)
     if not st.session_state.admin_mode:
         pwd = st.text_input("Password Admin", type="password")
         if st.button("Ativar Modo Edição"):
             check_login(pwd)
     else:
-        st.success("Administrador Autenticado")
-        if st.button("Sair"):
+        st.success("🔓 Modo Admin Ativo")
+        if st.button("Sair (Modo Público)"):
             logout()
+    
     st.divider()
     st.info("Utilizadores anónimos podem consultar e imprimir.")
 
-st.title("🏷️ Sistema SIRIUS - Gestão de Etiquetas")
+st.title("🏷️ Gestão de Etiquetas de Eficiência Energética")
 
 # Abas dinâmicas: Admin vê a aba de Registo, Anónimo não.
 if st.session_state.admin_mode:
@@ -156,4 +166,5 @@ if st.session_state.admin_mode:
                     if upload_para_nuvem(img_n, cod_n):
                         st.success("Etiqueta gravada com sucesso!")
                         st.rerun()
+
 
