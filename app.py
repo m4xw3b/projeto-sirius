@@ -1,4 +1,4 @@
-ueimport streamlit as st
+import streamlit as st
 from supabase import create_client, Client
 from PIL import Image, ImageDraw, ImageFont
 import requests
@@ -166,6 +166,7 @@ if st.session_state.admin_mode:
                     if upload_para_nuvem(img_n, cod_n):
                         st.success("Etiqueta gravada com sucesso!")
                         st.rerun()
+
 
 
 
