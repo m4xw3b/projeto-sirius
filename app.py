@@ -134,15 +134,17 @@ with st.sidebar:
     st.divider()
     st.info("Utilizadores anónimos podem consultar e imprimir.")
 
-st.divider() # Uma linha divisória antes do fim
-    
-    # Mensagem de rodapé centrada
-    st.markdown("""
-        <div class="sidebar-footer">
-            Projeto desenvolvido por <b>M4xW3b</b><br>
-            📩 <i>Sugestões: contacto@exemplo.com</i>
-        </div>
-    """, unsafe_allow_html=True)
+# No final do teu script, fora de qualquer bloco 'if' se quiseres que apareça sempre
+st.sidebar.markdown("---")
+st.sidebar.markdown(
+    """
+    <div style="text-align: center; font-size: 12px; color: #666; padding-top: 10px;">
+        Projeto desenvolvido por <b>M4xW3b</b><br>
+        📩 <i>Sugestões: contacto@exemplo.com</i>
+    </div>
+    """, 
+    unsafe_allow_html=True
+)
 
 st.subheader("🏷️ Gestão de Etiquetas de Eficiência Energética")
 
@@ -201,6 +203,7 @@ if st.session_state.admin_mode:
                     if upload_para_nuvem(img_n, cod_n):
                         st.success("Etiqueta gravada com sucesso!")
                         st.rerun()
+
 
 
 
