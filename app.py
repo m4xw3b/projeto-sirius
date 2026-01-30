@@ -48,8 +48,7 @@ def aplicar_design():
         div[data-testid="stSidebar"] div[data-baseweb="input"] {
             border: 2px solid #007bff !important;
             border-radius: 10px !important;
-            /* ALTERA ESTES VALORES PARA AJUSTAR O TAMANHO */
-            width: 180px !important;      /* Largura fixa (ex: 180px, 200px, 250px) */
+            width: 180px !important;
             margin: 0 auto !important;
         }
 
@@ -65,6 +64,21 @@ def aplicar_design():
             width: auto !important;
             padding-left: 20px !important;
             padding-right: 20px !important;
+        }
+
+        /* 4. BARRA FIXA NO FUNDO DA SIDEBAR */
+        .sidebar-footer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #f8f9fa; /* Cor suave de fundo */
+            border-top: 1px solid #ddd;
+            padding: 15px 0;
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            z-index: 999;
         }
         </style>
     """, unsafe_allow_html=True)
@@ -203,6 +217,7 @@ if st.session_state.admin_mode:
                     if upload_para_nuvem(img_n, cod_n):
                         st.success("Etiqueta gravada com sucesso!")
                         st.rerun()
+
 
 
 
