@@ -43,7 +43,7 @@ def aplicar_design():
             justify-content: center;
         }
 
-        /* 2. Centrar a Caixa de Password e dar o rebordo azul */
+        /* 2. Centrar a Caixa de Password com rebordo azul */
         div[data-testid="stSidebar"] div[data-baseweb="input"] {
             border: 2px solid #007bff !important;
             border-radius: 10px !important;
@@ -51,18 +51,17 @@ def aplicar_design():
             margin: 0 auto !important;
         }
 
-        /* 3. CENTRAR O BOTÃO (Sem mudar a cor original) */
-        /* Alinhamos o contentor do botão ao centro */
-        [data-testid="stSidebar"] [data-testid="stButton"] {
+        /* 3. A SOLUÇÃO PARA O BOTÃO */
+        /* Precisamos de forçar o alinhamento no 'stVerticalBlock' da sidebar */
+        [data-testid="stSidebar"] [data-testid="stVerticalBlock"] div.stButton {
             display: flex;
             justify-content: center;
+            width: 100%;
         }
-        
-        /* Definimos que o botão não ocupa 100%, para que se veja o centro */
+
         [data-testid="stSidebar"] [data-testid="stButton"] button {
-            width: auto !important; /* O botão cresce conforme o texto */
-            padding-left: 20px !important;
-            padding-right: 20px !important;
+            width: auto !important; /* Mantém o tamanho original do texto */
+            display: block;
             margin: 0 auto !important;
         }
         </style>
@@ -190,6 +189,7 @@ if st.session_state.admin_mode:
                     if upload_para_nuvem(img_n, cod_n):
                         st.success("Etiqueta gravada com sucesso!")
                         st.rerun()
+
 
 
 
