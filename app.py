@@ -37,15 +37,33 @@ def logout():
 def aplicar_design():
     st.markdown("""
         <style>
-        /* Alinha o container do botão ao centro e define uma largura máxima */
+        /* 1. Centrar o Logo */
+        [data-testid="stSidebar"] [data-testid="stImage"] {
+            display: flex;
+            justify-content: center;
+        }
+
+        /* 2. Centrar a Caixa de Password e dar o rebordo azul */
+        div[data-testid="stSidebar"] div[data-baseweb="input"] {
+            border: 2px solid #007bff !important;
+            border-radius: 10px !important;
+            width: 90% !important;
+            margin: 0 auto !important;
+        }
+
+        /* 3. CENTRAR O BOTÃO (Sem mudar a cor original) */
+        /* Alinhamos o contentor do botão ao centro */
         [data-testid="stSidebar"] [data-testid="stButton"] {
             display: flex;
             justify-content: center;
         }
         
+        /* Definimos que o botão não ocupa 100%, para que se veja o centro */
         [data-testid="stSidebar"] [data-testid="stButton"] button {
-            width: 80% !important; /* Define que o botão não ocupa a largura toda */
-            margin: 0 auto;
+            width: auto !important; /* O botão cresce conforme o texto */
+            padding-left: 20px !important;
+            padding-right: 20px !important;
+            margin: 0 auto !important;
         }
         </style>
     """, unsafe_allow_html=True)
@@ -172,6 +190,7 @@ if st.session_state.admin_mode:
                     if upload_para_nuvem(img_n, cod_n):
                         st.success("Etiqueta gravada com sucesso!")
                         st.rerun()
+
 
 
 
