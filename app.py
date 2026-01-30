@@ -110,29 +110,70 @@ def upload_para_nuvem(imagem_file, codigo):
         return None
 
 def imprimir_direto_html(lista_dados):
-    """Gera HTML com script para abrir janela de impressão do browser"""
+    """Gera HTML com medidas reais (cm) para garantir 3 etiquetas por folha A4"""
     html_content = """
     <html>
     <head>
         <style>
-            @page { size: landscape; margin: 1cm; }
-            body { display: flex; justify-content: space-around; align-items: center; height: 90vh; margin: 0; }
-            .etiqueta { text-align: center; width: 30%; }
-            img { width: 100%; height: auto; border: 1px solid #eee; }
-            p { font-family: Arial, sans-serif; font-weight: bold; margin-top: 10px; }
+            /* Configuração da página A4 em Paisagem */
+            @page { 
+                size: A4 landscape; 
+                margin: 0; 
+            }
+            body { 
+                margin: 0; 
+                padding: 0; 
+                display: flex; 
+                justify-content: center; 
+                align-items: center; 
+                height: 100vh;
+                background-color: white;
+            }
+            .content-container {
+                display: flex;
+                gap: 2cm; /* Espaço entre as etiquetas */
+                justify-content: center;
+                align-items: flex-start;
+            }
+            .etiqueta-box {
+                text-align: center;
+                /* Medidas exatas solicitadas: 6.5cm x 13.5cm */
+                width: 6.5cm;
+            }
+            .etiqueta-img {
+                width: 6.5cm;
+                height: 13.5cm;
+                object-fit: contain;
+                border: 0.5px solid #eee; /* Borda fina para guiar o corte */
+            }
+            .legenda {
+                font-family: Arial, sans-serif;
+                font-size: 14pt;
+                font-weight: bold;
+                margin-top: 0.5cm;
+                color: black;
+            }
         </style>
     </head>
     <body>
+        <div class="content-container">
     """
+    
     for item in lista_dados:
         html_content += f"""
-        <div class="etiqueta">
-            <img src="{item['imagem_url']}">
-            <p>SIRIUS: {item['codigo']}</p>
+        <div class="etiqueta-box">
+            <img class="etiqueta-img" src="{item['imagem_url']}">
+            <div class="legenda">SIRIUS: {item['codigo']}</div>
         </div>
         """
+    
     html_content += """
-    <script>window.onload = function() { window.print(); }</script>
+        </div>
+        <script>
+            window.onload = function() { 
+                setTimeout(function() { window.print(); }, 500); 
+            };
+        </script>
     </body>
     </html>
     """
@@ -232,3 +273,4 @@ if st.session_state.admin_mode:
                     if upload_para_nuvem(img_n, cod_n):
                         st.success("Etiqueta gravada com sucesso!")
                         st.rerun()
+
