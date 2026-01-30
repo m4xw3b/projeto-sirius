@@ -37,33 +37,19 @@ def logout():
 def aplicar_design():
     st.markdown("""
         <style>
-        /* Fundo da aplicação */
-        .stApp { background-color: #f8f9fa; }
-
-        /* Remove o rebordo padrão e aplica o nosso personalizado */
-        div[data-testid="stSidebar"] div[data-baseweb="input"] {
-            border: 2px solid #007bff !important; /* Rebordo azul fixo */
-            border-radius: 10px !important;
-            background-color: white !important;
-            box-shadow: none !important;
+        /* Alinha o container do botão ao centro e define uma largura máxima */
+        [data-testid="stSidebar"] [data-testid="stButton"] {
+            display: flex;
+            justify-content: center;
         }
-
-        /* Estilo quando a caixa está selecionada */
-        div[data-testid="stSidebar"] div[data-baseweb="input"]:focus-within {
-            border-color: #28a745 !important; /* Muda para verde no foco */
-            box-shadow: 0 0 5px rgba(40, 167, 69, 0.3) !important;
-        }
-
-        /* Ajuste do botão de login na sidebar */
-        div[data-testid="stSidebar"] .stButton>button {
-            border-radius: 10px;
-            background-color: #f0f2f6;
-            color: #31333F;
-            border: 1px solid #dcdcdc;
+        
+        [data-testid="stSidebar"] [data-testid="stButton"] button {
+            width: 80% !important; /* Define que o botão não ocupa a largura toda */
+            margin: 0 auto;
         }
         </style>
     """, unsafe_allow_html=True)
-
+    
 # --- 4. FUNÇÕES DE SUPORTE ---
 def upload_para_nuvem(imagem_file, codigo):
     try:
@@ -186,6 +172,7 @@ if st.session_state.admin_mode:
                     if upload_para_nuvem(img_n, cod_n):
                         st.success("Etiqueta gravada com sucesso!")
                         st.rerun()
+
 
 
 
