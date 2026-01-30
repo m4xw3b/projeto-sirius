@@ -122,7 +122,7 @@ with st.sidebar:
     # Sistema de Login (Modo Admin)
     if not st.session_state.admin_mode:
         pwd = st.text_input("Introduza a password", type="password")
-        if st.button("Modo Administrativo"):
+        if st.button("  Modo Administrativo  "):
             check_login(pwd)
     else:
         st.success("🔓 Modo Admin Ativo")
@@ -189,6 +189,7 @@ if st.session_state.admin_mode:
                     if upload_para_nuvem(img_n, cod_n):
                         st.success("Etiqueta gravada com sucesso!")
                         st.rerun()
+
 
 
 
