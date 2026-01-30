@@ -37,12 +37,23 @@ def logout():
 def aplicar_design():
     st.markdown("""
         <style>
-        .stApp { background-color: #f8f9fa; }
-        .stButton>button { border-radius: 8px; font-weight: bold; transition: 0.3s; }
-        [data-testid="stSidebar"] { background-color: #ffffff; border-right: 1px solid #eee; }
-        .galeria-card {
-            border: 1px solid #e0e0e0; border-radius: 10px;
-            padding: 10px; background-color: white; text-align: center; margin-bottom: 20px;
+        /* Estilização específica para a caixa de password na sidebar */
+        section[data-testid="stSidebar"] .stTextInput div div {
+            border: 2px solid #007bff; /* Rebordo azul */
+            border-radius: 10px;       /* Cantos arredondados */
+            background-color: #f0f2f6; /* Fundo suave */
+        }
+
+        /* Efeito quando o utilizador clica na caixa (Focus) */
+        section[data-testid="stSidebar"] .stTextInput div div:focus-within {
+            border: 2px solid #28a745; /* Muda para verde ao clicar */
+            box-shadow: 0 0 10px rgba(40, 167, 69, 0.2); /* Brilho suave */
+        }
+
+        /* Texto de ajuda por cima da caixa */
+        section[data-testid="stSidebar"] .stTextInput label {
+            color: #333;
+            font-weight: bold;
         }
         </style>
     """, unsafe_allow_html=True)
@@ -89,7 +100,7 @@ with st.sidebar:
     # 1. Tentar carregar o logo localmente
     try:
         logo = Image.open("ee_logo.png")
-        st.image(logo, use_container_width=True)
+        st.image(logo, width=150)
     except:
         # Caso o ficheiro não exista, usa um ícone de backup
         st.image("https://img.icons8.com/clouds/200/energy-usage.png", width=100)
@@ -166,6 +177,7 @@ if st.session_state.admin_mode:
                     if upload_para_nuvem(img_n, cod_n):
                         st.success("Etiqueta gravada com sucesso!")
                         st.rerun()
+
 
 
 
