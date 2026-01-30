@@ -116,7 +116,7 @@ with st.sidebar:
     st.write("📅 **Data:** 2026")
 
 # Conteúdo Principal
-st.title("🏷️ Gestão de Etiquetas Eficiência Energética - Sirius")
+st.title("🏷️ Gestão de Etiquetas Eficiência Energética")
 
 tab_reg, tab_imp = st.tabs(["📥 Novo Registo", "🖨️ Área de Impressão"])
 
@@ -160,4 +160,5 @@ with tab_imp:
                 folha = criar_folha_a4_cloud(encontrados)
                 st.image(folha, caption="Visualização da Folha", use_container_width=True)
                 st.download_button("📥 Descarregar Folha para Impressão", data=folha, file_name="SIRIUS_A4.jpg", mime="image/jpeg")
+
 
