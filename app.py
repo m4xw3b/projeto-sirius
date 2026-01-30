@@ -37,23 +37,29 @@ def logout():
 def aplicar_design():
     st.markdown("""
         <style>
-        /* Estilização específica para a caixa de password na sidebar */
-        section[data-testid="stSidebar"] .stTextInput div div {
-            border: 2px solid #007bff; /* Rebordo azul */
-            border-radius: 10px;       /* Cantos arredondados */
-            background-color: #f0f2f6; /* Fundo suave */
+        /* Fundo da aplicação */
+        .stApp { background-color: #f8f9fa; }
+
+        /* Remove o rebordo padrão e aplica o nosso personalizado */
+        div[data-testid="stSidebar"] div[data-baseweb="input"] {
+            border: 2px solid #007bff !important; /* Rebordo azul fixo */
+            border-radius: 10px !important;
+            background-color: white !important;
+            box-shadow: none !important;
         }
 
-        /* Efeito quando o utilizador clica na caixa (Focus) */
-        section[data-testid="stSidebar"] .stTextInput div div:focus-within {
-            border: 2px solid #28a745; /* Muda para verde ao clicar */
-            box-shadow: 0 0 10px rgba(40, 167, 69, 0.2); /* Brilho suave */
+        /* Estilo quando a caixa está selecionada */
+        div[data-testid="stSidebar"] div[data-baseweb="input"]:focus-within {
+            border-color: #28a745 !important; /* Muda para verde no foco */
+            box-shadow: 0 0 5px rgba(40, 167, 69, 0.3) !important;
         }
 
-        /* Texto de ajuda por cima da caixa */
-        section[data-testid="stSidebar"] .stTextInput label {
-            color: #333;
-            font-weight: bold;
+        /* Ajuste do botão de login na sidebar */
+        div[data-testid="stSidebar"] .stButton>button {
+            border-radius: 10px;
+            background-color: #f0f2f6;
+            color: #31333F;
+            border: 1px solid #dcdcdc;
         }
         </style>
     """, unsafe_allow_html=True)
@@ -177,6 +183,7 @@ if st.session_state.admin_mode:
                     if upload_para_nuvem(img_n, cod_n):
                         st.success("Etiqueta gravada com sucesso!")
                         st.rerun()
+
 
 
 
