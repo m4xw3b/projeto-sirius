@@ -103,13 +103,16 @@ def criar_folha_a4_cloud(lista_dados):
 aplicar_design()
 
 with st.sidebar:
-    # 1. Tentar carregar o logo localmente
-    try:
-        logo = Image.open("ee_logo.png")
-        st.image(logo, width=150)
-    except:
-        # Caso o ficheiro não exista, usa um ícone de backup
-        st.image("https://img.icons8.com/clouds/200/energy-usage.png", width=100)
+    # Criamos 3 colunas. A do meio (2) será onde o logo fica.
+    # Os números [1, 2, 1] definem a proporção do espaço.
+    col_esq, col_logo, col_dir = st.columns([1, 2, 1])
+    
+    with col_logo:
+        try:
+            logo = Image.open("logo.png")
+            st.image(logo, width=150)
+        except:
+            st.image("https://img.icons8.com/clouds/200/energy-usage.png", width=100)
     
     st.title("Projeto EcoPrint Mobile")
     
@@ -183,6 +186,7 @@ if st.session_state.admin_mode:
                     if upload_para_nuvem(img_n, cod_n):
                         st.success("Etiqueta gravada com sucesso!")
                         st.rerun()
+
 
 
 
