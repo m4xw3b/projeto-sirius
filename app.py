@@ -134,7 +134,7 @@ with st.sidebar:
     st.divider()
     st.info("Utilizadores anónimos podem consultar e imprimir.")
 
-st.header("🏷️ Gestão de Etiquetas de Eficiência Energética")
+st.subheader("🏷️ Gestão de Etiquetas de Eficiência Energética")
 
 # Abas dinâmicas: Admin vê a aba de Registo, Anónimo não.
 if st.session_state.admin_mode:
@@ -191,6 +191,7 @@ if st.session_state.admin_mode:
                     if upload_para_nuvem(img_n, cod_n):
                         st.success("Etiqueta gravada com sucesso!")
                         st.rerun()
+
 
 
 
