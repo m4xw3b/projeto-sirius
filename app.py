@@ -108,15 +108,15 @@ aplicar_design()
 
 # Barra Lateral (Menu)
 with st.sidebar:
-    st.image("https://img.icons8.com/clouds/200/database.png", width=100)
-    st.title("SIRIUS Cloud")
+    st.image("https://img.icons8.com/clouds/200/database.png", width=200)
+    st.title("EEs na Cloud")
     st.info("Sistema de Gestão de Etiquetas Energéticas v2.0")
     st.divider()
     st.write("🔧 **Status:** Conectado ao Supabase")
     st.write("📅 **Data:** 2026")
 
 # Conteúdo Principal
-st.title("🏷️ Gestão de Etiquetas Sirius")
+st.title("🏷️ Gestão de Etiquetas Eficiência Energética - Sirius")
 
 tab_reg, tab_imp = st.tabs(["📥 Novo Registo", "🖨️ Área de Impressão"])
 
@@ -160,3 +160,4 @@ with tab_imp:
                 folha = criar_folha_a4_cloud(encontrados)
                 st.image(folha, caption="Visualização da Folha", use_container_width=True)
                 st.download_button("📥 Descarregar Folha para Impressão", data=folha, file_name="SIRIUS_A4.jpg", mime="image/jpeg")
+
