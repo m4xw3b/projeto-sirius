@@ -1,12 +1,11 @@
 import streamlit as st
 from supabase import create_client, Client
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image
 import requests
 from io import BytesIO
 import io
 
 # --- 1. CONFIGURAÇÃO SEGURA (SECRETS) ---
-# O Streamlit vai procurar estes nomes na sua "caixa forte" online
 try:
     SUPABASE_URL = st.secrets["SUPABASE_URL"]
     SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
@@ -26,6 +25,7 @@ def check_login(password):
     if password == ADMIN_PASSWORD: 
         st.session_state.admin_mode = True
         st.success("🔓 Modo Administrador Ativado!")
+        st.rerun()
     else:
         st.error("❌ Password incorreta")
 
@@ -37,14 +37,14 @@ def logout():
 def aplicar_design():
     st.markdown("""
         <style>
-        /* 1. Manter a centralização global da sidebar */
+        /* 1. Centralização global da sidebar */
         [data-testid="stSidebarUserContent"] > div:first-child {
             display: flex;
             flex-direction: column;
             align-items: center;
         }
 
-        /* 2. REDIMENSIONAR A CAIXA DA PASSWORD */
+        /* 2. Redimensionar e centrar caixa de password */
         div[data-testid="stSidebar"] div[data-baseweb="input"] {
             border: 2px solid #007bff !important;
             border-radius: 10px !important;
@@ -52,7 +52,7 @@ def aplicar_design():
             margin: 0 auto !important;
         }
 
-        /* 3. Manter o botão alinhado e bonito */
+        /* 3. Centrar botões da sidebar */
         [data-testid="stSidebar"] .stButton {
             display: flex;
             justify-content: center;
@@ -66,13 +66,13 @@ def aplicar_design():
             padding-right: 20px !important;
         }
 
-        /* 4. BARRA FIXA NO FUNDO DA SIDEBAR */
+        /* 4. Barra fixa no fundo da sidebar */
         .sidebar-footer {
             position: fixed;
             bottom: 0;
             left: 0;
             width: 100%;
-            background-color: #f8f9fa; /* Cor suave de fundo */
+            background-color: #f8f9fa;
             border-top: 1px solid #ddd;
             padding: 15px 0;
             text-align: center;
@@ -80,9 +80,19 @@ def aplicar_design():
             color: #666;
             z-index: 999;
         }
+
+        /* 5. Cartões da Galeria */
+        .galeria-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 10px;
+            background-color: white;
+            text-align: center;
+            margin-bottom: 20px;
+        }
         </style>
     """, unsafe_allow_html=True)
-    
+
 # --- 4. FUNÇÕES DE SUPORTE ---
 def upload_para_nuvem(imagem_file, codigo):
     try:
@@ -99,33 +109,40 @@ def upload_para_nuvem(imagem_file, codigo):
         st.error(f"Erro no upload: {e}")
         return None
 
-def criar_folha_a4_cloud(lista_dados):
-    largura_a4, altura_a4 = 3508, 2480
-    dpi = 300
-    largura_px, altura_px = int((6.5/2.54)*dpi), int((13.5/2.54)*dpi)
-    folha = Image.new('RGB', (largura_a4, altura_a4), 'white')
-    desenho = ImageDraw.Draw(folha)
-    try: fonte = ImageFont.truetype("arial.ttf", 60)
-    except: fonte = ImageFont.load_default()
-    for i, item in enumerate(lista_dados):
-        try:
-            res = requests.get(item['imagem_url'])
-            img = Image.open(BytesIO(res.content)).convert("RGB").resize((largura_px, altura_px))
-            folha.paste(img, (150 + (i * (largura_px + 100)), (altura_a4 - altura_px) // 2))
-            desenho.text((150 + (i * (largura_px + 100)) + 50, (altura_a4 - altura_px) // 2 + altura_px + 40), f"SIRIUS: {item['codigo']}", fill="black", font=fonte)
-        except: continue
-    buf = io.BytesIO()
-    folha.save(buf, format="JPEG", quality=95)
-    return buf.getvalue()
+def imprimir_direto_html(lista_dados):
+    """Gera HTML com script para abrir janela de impressão do browser"""
+    html_content = """
+    <html>
+    <head>
+        <style>
+            @page { size: landscape; margin: 1cm; }
+            body { display: flex; justify-content: space-around; align-items: center; height: 90vh; margin: 0; }
+            .etiqueta { text-align: center; width: 30%; }
+            img { width: 100%; height: auto; border: 1px solid #eee; }
+            p { font-family: Arial, sans-serif; font-weight: bold; margin-top: 10px; }
+        </style>
+    </head>
+    <body>
+    """
+    for item in lista_dados:
+        html_content += f"""
+        <div class="etiqueta">
+            <img src="{item['imagem_url']}">
+            <p>SIRIUS: {item['codigo']}</p>
+        </div>
+        """
+    html_content += """
+    <script>window.onload = function() { window.print(); }</script>
+    </body>
+    </html>
+    """
+    return html_content
 
 # --- 5. INTERFACE DO UTILIZADOR ---
 aplicar_design()
 
 with st.sidebar:
-    # Criamos 3 colunas. A do meio (2) será onde o logo fica.
-    # Os números [1, 2, 1] definem a proporção do espaço.
     col_esq, col_logo, col_dir = st.columns([1, 2, 1])
-    
     with col_logo:
         try:
             logo = Image.open("ee_logo.png")
@@ -135,10 +152,9 @@ with st.sidebar:
     
     st.title("Projeto EcoPrint")
     
-    # Sistema de Login (Modo Admin)
     if not st.session_state.admin_mode:
         pwd = st.text_input("Introduza a password", type="password")
-        if st.button("  Modo Administrativo  "):
+        if st.button(" Modo Administrativo "):
             check_login(pwd)
     else:
         st.success("🔓 Modo Admin Ativo")
@@ -148,27 +164,22 @@ with st.sidebar:
     st.divider()
     st.info("Utilizadores anónimos podem consultar e imprimir.")
 
-# No final do teu script, fora de qualquer bloco 'if' se quiseres que apareça sempre
-st.sidebar.markdown("---")
-st.sidebar.markdown(
-    """
-    <div style="text-align: center; font-size: 12px; color: #666; padding-top: 10px;">
-        Projeto desenvolvido por <b>M4xW3b</b><br>
-        📩 <i>Sugestões: geral@wintech.pt</i>
-    </div>
-    """, 
-    unsafe_allow_html=True
-)
+    # Rodapé fixo na Sidebar
+    st.markdown("""
+        <div class="sidebar-footer">
+            Projeto desenvolvido por <b>M4xW3b</b><br>
+            📩 <i>Sugestões: geral@wintech.pt</i>
+        </div>
+    """, unsafe_allow_html=True)
 
 st.subheader("🏷️ Gestão de Etiquetas de Eficiência Energética")
 
-# Abas dinâmicas: Admin vê a aba de Registo, Anónimo não.
 if st.session_state.admin_mode:
     abas = st.tabs(["🖼️ Galeria", "🖨️ Impressão", "📥 NOVO REGISTO"])
 else:
     abas = st.tabs(["🖼️ Galeria", "🖨️ Impressão"])
 
-# --- ABA GALERIA (Pública) ---
+# --- ABA GALERIA ---
 with abas[0]:
     st.markdown("### Histórico de Etiquetas")
     res_galeria = supabase.table("etiquetas").select("*").order("created_at", desc=True).execute()
@@ -185,26 +196,30 @@ with abas[0]:
                         supabase.table("etiquetas").delete().eq("id", item['id']).execute()
                         st.rerun()
 
-# --- ABA IMPRESSÃO (Pública) ---
+# --- ABA IMPRESSÃO ---
 with abas[1]:
-    st.markdown("### Gerar Folha para Impressão")
+    st.markdown("### Enviar para Impressão")
     ca, cb, cc = st.columns(3)
     with ca: cod1 = st.text_input("Código 1", key="imp1")
     with cb: cod2 = st.text_input("Código 2", key="imp2")
     with cc: cod3 = st.text_input("Código 3", key="imp3")
-    if st.button("🔍 Gerar Pré-visualização"):
+    
+    if st.button("🖨️ Preparar e Imprimir"):
         cods = [c.strip() for c in [cod1, cod2, cod3] if c.strip()]
         if cods:
             enc = []
             for c in cods:
                 r = supabase.table("etiquetas").select("*").eq("codigo", c).execute()
                 if r.data: enc.append(r.data[0])
+            
             if enc:
-                folha = criar_folha_a4_cloud(enc)
-                st.image(folha, use_container_width=True)
-                st.download_button("📥 Descarregar Folha", data=folha, file_name="SIRIUS_A4.jpg")
+                conteudo_html = imprimir_direto_html(enc)
+                st.components.v1.html(conteudo_html, height=0, width=0)
+                st.info("A processar janela de impressão...")
+            else:
+                st.error("Nenhum código encontrado na base de dados.")
 
-# --- ABA REGISTO (Apenas Admin) ---
+# --- ABA REGISTO ---
 if st.session_state.admin_mode:
     with abas[2]:
         st.markdown("### Upload de Nova Etiqueta")
@@ -217,25 +232,3 @@ if st.session_state.admin_mode:
                     if upload_para_nuvem(img_n, cod_n):
                         st.success("Etiqueta gravada com sucesso!")
                         st.rerun()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
