@@ -109,7 +109,7 @@ with st.sidebar:
     
     with col_logo:
         try:
-            logo = Image.open("logo.png")
+            logo = Image.open("ee_logo.png")
             st.image(logo, width=150)
         except:
             st.image("https://img.icons8.com/clouds/200/energy-usage.png", width=100)
@@ -186,6 +186,7 @@ if st.session_state.admin_mode:
                     if upload_para_nuvem(img_n, cod_n):
                         st.success("Etiqueta gravada com sucesso!")
                         st.rerun()
+
 
 
 
