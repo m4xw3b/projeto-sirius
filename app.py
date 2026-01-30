@@ -37,32 +37,40 @@ def logout():
 def aplicar_design():
     st.markdown("""
         <style>
-        /* 1. Centrar o Logo */
-        [data-testid="stSidebar"] [data-testid="stImage"] {
+        /* 1. CENTRAR TUDO NA SIDEBAR */
+        /* Este seletor ataca a coluna interna da sidebar e centra os filhos */
+        [data-testid="stSidebarUserContent"] > div:first-child {
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
         }
 
-        /* 2. Centrar a Caixa de Password com rebordo azul */
+        /* 2. Ajustar o Logo */
+        [data-testid="stSidebar"] [data-testid="stImage"] {
+            margin-bottom: 20px;
+        }
+
+        /* 3. Ajustar a Caixa de Password */
+        /* Precisamos garantir que ela tem largura, senão fica minúscula no centro */
         div[data-testid="stSidebar"] div[data-baseweb="input"] {
             border: 2px solid #007bff !important;
             border-radius: 10px !important;
-            width: 90% !important;
-            margin: 0 auto !important;
+            min-width: 220px !important; /* Garante tamanho no centro */
+            margin-bottom: 15px !important;
         }
 
-        /* 3. A SOLUÇÃO PARA O BOTÃO */
-        /* Precisamos de forçar o alinhamento no 'stVerticalBlock' da sidebar */
-        [data-testid="stSidebar"] [data-testid="stVerticalBlock"] div.stButton {
+        /* 4. O BOTÃO */
+        /* Removemos margens fixas e deixamos o flexbox do pai centrar */
+        [data-testid="stSidebar"] .stButton {
             display: flex;
             justify-content: center;
             width: 100%;
         }
 
-        [data-testid="stSidebar"] [data-testid="stButton"] button {
-            width: auto !important; /* Mantém o tamanho original do texto */
-            display: block;
-            margin: 0 auto !important;
+        [data-testid="stSidebar"] .stButton button {
+            width: auto !important;
+            padding-left: 30px !important;
+            padding-right: 30px !important;
         }
         </style>
     """, unsafe_allow_html=True)
@@ -189,6 +197,7 @@ if st.session_state.admin_mode:
                     if upload_para_nuvem(img_n, cod_n):
                         st.success("Etiqueta gravada com sucesso!")
                         st.rerun()
+
 
 
 
