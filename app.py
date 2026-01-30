@@ -140,7 +140,7 @@ st.sidebar.markdown(
     """
     <div style="text-align: center; font-size: 12px; color: #666; padding-top: 10px;">
         Projeto desenvolvido por <b>M4xW3b</b><br>
-        📩 <i>Sugestões: contacto@exemplo.com</i>
+        📩 <i>Sugestões: geral@wintech.pt</i>
     </div>
     """, 
     unsafe_allow_html=True
@@ -203,6 +203,7 @@ if st.session_state.admin_mode:
                     if upload_para_nuvem(img_n, cod_n):
                         st.success("Etiqueta gravada com sucesso!")
                         st.rerun()
+
 
 
 
