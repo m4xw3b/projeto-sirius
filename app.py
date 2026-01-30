@@ -134,6 +134,16 @@ with st.sidebar:
     st.divider()
     st.info("Utilizadores anónimos podem consultar e imprimir.")
 
+st.divider() # Uma linha divisória antes do fim
+    
+    # Mensagem de rodapé centrada
+    st.markdown("""
+        <div class="sidebar-footer">
+            Projeto desenvolvido por <b>M4xW3b</b><br>
+            📩 <i>Sugestões: contacto@exemplo.com</i>
+        </div>
+    """, unsafe_allow_html=True)
+
 st.subheader("🏷️ Gestão de Etiquetas de Eficiência Energética")
 
 # Abas dinâmicas: Admin vê a aba de Registo, Anónimo não.
@@ -191,6 +201,7 @@ if st.session_state.admin_mode:
                     if upload_para_nuvem(img_n, cod_n):
                         st.success("Etiqueta gravada com sucesso!")
                         st.rerun()
+
 
 
 
