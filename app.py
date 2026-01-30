@@ -17,9 +17,9 @@ def upload_etiqueta(imagem_file, codigo):
         
         # 1. Upload para o Storage (Bucket: imagens_sirius)
         supabase.storage.from_("imagens_sirius").upload(
-            path=nome_ficheiro,
+            path=f"{codigo}.jpg",
             file=conteudo,
-            file_options={"content-type": "image/jpeg"}
+            file_options={"content-type": "image/jpeg", "upsert": "true"}
         )
         
         # 2. Obter URL Pública
@@ -89,5 +89,6 @@ with tab_imp:
                 # passando os links: encontrados[i]['imagem_url']
         else:
             st.error("Introduza pelo menos um código.")
+
 
 
