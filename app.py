@@ -88,7 +88,7 @@ aplicar_design()
 with st.sidebar:
     # 1. Tentar carregar o logo localmente
     try:
-        logo = Image.open("logo.png")
+        logo = Image.open("ee_logo.png")
         st.image(logo, use_container_width=True)
     except:
         # Caso o ficheiro não exista, usa um ícone de backup
@@ -166,5 +166,6 @@ if st.session_state.admin_mode:
                     if upload_para_nuvem(img_n, cod_n):
                         st.success("Etiqueta gravada com sucesso!")
                         st.rerun()
+
 
 
