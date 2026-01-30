@@ -1,93 +1,91 @@
 import streamlit as st
-import os
+from supabase import create_client, Client
 from PIL import Image, ImageDraw, ImageFont
 import io
 
-# Configuração da Página
-st.set_page_config(page_title="Sistema SIRIUS - Etiquetas", layout="wide")
+# --- CONFIGURAÇÃO DO SUPABASE ---
+# Substitui com os dados que copiaste do teu painel API
+SUPABASE_URL = "https://pfpfdlugehsbqxwkgyj.supabase.co"
+SUPABASE_KEY = "A_TUA_PUBLISHABLE_KEY_AQUI"
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-
-def criar_a4_sirius(lista_dados):
-    """Monta a folha A4 e retorna o buffer da imagem."""
-    largura_a4, altura_a4 = 3508, 2480
-    dpi = 300
-    largura_px = int((6.5 / 2.54) * dpi)
-    altura_px = int((13.5 / 2.54) * dpi)
-    margem_e_espaco = 150
-
-    folha = Image.new('RGB', (largura_a4, altura_a4), 'white')
-    desenho = ImageDraw.Draw(folha)
-
+def upload_etiqueta(imagem_file, codigo):
+    """Guarda a imagem no Storage e o registo na Tabela."""
     try:
-        # No Streamlit Cloud, fontes .ttf devem estar na pasta do projeto
-        fonte = ImageFont.truetype("arial.ttf", 60)
-    except:
-        fonte = ImageFont.load_default()
+        nome_ficheiro = f"{codigo}.jpg"
+        conteudo = imagem_file.getvalue()
+        
+        # 1. Upload para o Storage (Bucket: imagens_sirius)
+        supabase.storage.from_("imagens_sirius").upload(
+            path=nome_ficheiro,
+            file=conteudo,
+            file_options={"content-type": "image/jpeg"}
+        )
+        
+        # 2. Obter URL Pública
+        url_publica = supabase.storage.from_("imagens_sirius").get_public_url(nome_ficheiro)
+        
+        # 3. Inserir na Tabela (Tabela: etiquetas)
+        dados = {"codigo": codigo, "imagem_url": url_publica}
+        supabase.table("etiquetas").insert(dados).execute()
+        return url_publica
+    except Exception as e:
+        st.error(f"Erro no upload: {e}")
+        return None
 
-    for i, (img_file, cod) in enumerate(lista_dados):
-        try:
-            img = Image.open(img_file).convert("RGB").resize((largura_px, altura_px))
-            pos_x = margem_e_espaco + (i * (largura_px + 100))
-            pos_y = (altura_a4 - altura_px) // 2
-            folha.paste(img, (pos_x, pos_y))
-            texto_y = pos_y + altura_px + 40
-            desenho.text((pos_x + 50, texto_y), f"SIRIUS: {cod}", fill="black", font=fonte)
-        except Exception as e:
-            st.error(f"Erro ao processar {cod}: {e}")
+def buscar_etiquetas(lista_codigos):
+    """Procura os códigos na base de dados."""
+    resultados = []
+    for cod in lista_codigos:
+        res = supabase.table("etiquetas").select("*").eq("codigo", cod).execute()
+        if res.data:
+            resultados.append(res.data[0])
+        else:
+            st.warning(f"Código {cod} não encontrado na base de dados.")
+    return resultados
 
-    # Salva em memória para download
-    buf = io.BytesIO()
-    folha.save(buf, format="JPEG", quality=95)
-    byte_im = buf.getvalue()
-    return byte_im
+# --- INTERFACE STREAMLIT ---
+st.set_page_config(page_title="SIRIUS Cloud", layout="wide")
+st.title("🏷️ Sistema SIRIUS Cloud v2.0")
 
+tab_imp, tab_reg = st.tabs(["🖨️ Imprimir Etiquetas", "📥 Registar no Sistema"])
 
-# --- Interface Streamlit ---
-st.title("🏷️ Sistema SIRIUS v1.5 - Web Edition")
-st.markdown("Gerador de folhas A4 para etiquetas de eficiência energética.")
+with tab_reg:
+    st.subheader("Carregar nova etiqueta para a nuvem")
+    c1, c2 = st.columns(2)
+    with c1:
+        novo_cod = st.text_input("Código Sirius (ex: S123):")
+    with c2:
+        nova_img = st.file_uploader("Foto da Etiqueta", type=['jpg', 'jpeg', 'png'])
+    
+    if st.button("Gravar na Base de Dados"):
+        if novo_cod and nova_img:
+            with st.spinner("A guardar..."):
+                url = upload_etiqueta(nova_img, novo_cod)
+                if url:
+                    st.success(f"Sucesso! Código {novo_cod} guardado.")
+                    st.image(url, width=200)
+        else:
+            st.error("Preencha o código e carregue uma imagem.")
 
-aba1, aba2 = st.tabs(["🖨️ Gerar Impressão", "ℹ️ Instruções"])
+with tab_imp:
+    st.subheader("Gerar Folha A4 para Impressão")
+    st.write("Introduza até 3 códigos que já estejam no sistema:")
+    
+    col_a, col_b, col_c = st.columns(3)
+    cods_para_imprimir = []
+    with col_a: c1 = st.text_input("Código 1:")
+    with col_b: c2 = st.text_input("Código 2:")
+    with col_c: c3 = st.text_input("Código 3:")
+    
+    botoes_codigos = [c for c in [c1, c2, c3] if c]
 
-with aba1:
-    st.subheader("Selecione até 3 imagens")
-
-    col1, col2, col3 = st.columns(3)
-    imagens_selecionadas = []
-
-    with col1:
-        img1 = st.file_uploader("Imagem 1", type=['jpg', 'png', 'jpeg'], key="1")
-        cod1 = st.text_input("Código Sirius 1", key="c1")
-        if img1 and cod1: imagens_selecionadas.append((img1, cod1))
-
-    with col2:
-        img2 = st.file_uploader("Imagem 2", type=['jpg', 'png', 'jpeg'], key="2")
-        cod2 = st.text_input("Código Sirius 2", key="c2")
-        if img2 and cod2: imagens_selecionadas.append((img2, cod2))
-
-    with col3:
-        img3 = st.file_uploader("Imagem 3", type=['jpg', 'png', 'jpeg'], key="3")
-        cod3 = st.text_input("Código Sirius 3", key="c3")
-        if img3 and cod3: imagens_selecionadas.append((img3, cod3))
-
-    if imagens_selecionadas:
-        if st.button("🚀 Gerar Folha A4"):
-            with st.spinner("A processar imagens..."):
-                resultado_a4 = criar_a4_sirius(imagens_selecionadas)
-
-                st.image(resultado_a4, caption="Pré-visualização da Folha A4", use_container_width=True)
-
-                st.download_button(
-                    label="📥 Descarregar Folha para Impressão",
-                    data=resultado_a4,
-                    file_name="Folha_SIRIUS_A4.jpg",
-                    mime="image/jpeg"
-                )
-
-with aba2:
-    st.info("""
-    **Como usar:**
-    1. Carregue as fotos das etiquetas diretamente do seu PC ou Telemóvel.
-    2. Atribua o código correspondente.
-    3. Clique em 'Gerar Folha A4'.
-    4. Faça o download e imprima o ficheiro resultante.
-    """)
+    if st.button("🔍 Gerar Pré-visualização"):
+        if botoes_codigos:
+            encontrados = buscar_etiquetas(botoes_codigos)
+            if encontrados:
+                st.write(f"Encontradas {len(encontrados)} imagens. A montar folha...")
+                # Aqui podes inserir a tua função criar_a4_sirius anterior 
+                # passando os links: encontrados[i]['imagem_url']
+        else:
+            st.error("Introduza pelo menos um código.")
