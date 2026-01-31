@@ -36,19 +36,12 @@ def logout():
 def aplicar_design():
     st.markdown("""
         <style>
-        /* Sidebar e Inputs */
         [data-testid="stSidebarUserContent"] > div:first-child { display: flex; flex-direction: column; align-items: center; }
         div[data-testid="stSidebar"] div[data-baseweb="input"] { border: 2px solid #007bff !important; border-radius: 10px !important; width: 180px !important; margin: 0 auto !important; }
         [data-testid="stSidebar"] .stButton { display: flex; justify-content: center; width: 100%; margin-top: 10px; }
         [data-testid="stSidebar"] .stButton button { width: auto !important; padding: 0 20px !important; }
-        
-        /* Rodapé Fixo Sidebar */
         .sidebar-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: #f8f9fa; border-top: 1px solid #ddd; padding: 15px 0; text-align: center; font-size: 12px; color: #666; z-index: 999; }
-        
-        /* Cards da Galeria */
         .galeria-card { border: 1px solid #e0e0e0; border-radius: 10px; padding: 10px; background-color: white; text-align: center; margin-bottom: 20px; min-height: 330px; }
-        
-        /* Hero Banner */
         .landing-hero { background: linear-gradient(90deg, #004aad, #00c6ff); color: white; padding: 40px; border-radius: 15px; margin-bottom: 25px; text-align: center; }
         </style>
     """, unsafe_allow_html=True)
@@ -91,11 +84,11 @@ def imprimir_direto_html(lista_dados):
     <body><div class="container">
     """
     for item in lista_dados:
-        html_content += f'<div class="box"><img class="img-etiqueta" src="{item["imagem_url"]}"><div class="legenda">SIRIUS: {item["codigo"]}</div></div>'
+        html_content += f'<div class="box"><img class="img-etiqueta" src="{item["imagem_url"]}"><div class="legenda">CÓDIGO: {item["codigo"]}</div></div>'
     html_content += '</div><script>window.onload = function() { setTimeout(function() { window.print(); }, 800); };</script></body></html>'
     return html_content
 
-# --- 5. INTERFACE DO UTILIZADOR ---
+# --- 5. INTERFACE ---
 aplicar_design()
 
 with st.sidebar:
@@ -115,25 +108,25 @@ with st.sidebar:
     st.divider()
     st.markdown('<div class="sidebar-footer">Projeto desenvolvido por <b>M4xW3b</b><br>📩 <i>geral@wintech.pt</i></div>', unsafe_allow_html=True)
 
-st.subheader("🏷️ Gestão de Etiquetas Eficiência Energética")
+st.subheader("🏷️ Impressão de Etiquetas de Eficiência Energética")
 
-# Abas Dinâmicas
+# Definição de Abas
 if st.session_state.admin_mode:
     abas = st.tabs(["🏠 Início", "🖼️ Galeria", "🖨️ Impressão", "📥 Registo", "✏️ Editar"])
 else:
     abas = st.tabs(["🏠 Início", "🖼️ Galeria", "🖨️ Impressão"])
 
-# --- ABA 0: INÍCIO (ENQUADRAMENTO LEGAL) ---
+# --- ABA 0: INÍCIO ---
 with abas[0]:
     st.markdown('<div class="landing-hero"><h1>EcoPrint: Conformidade Legal 2026</h1><p>Regulamentos UE 2023/1670 e 2023/1669</p></div>', unsafe_allow_html=True)
     st.info("**Objetivo:** Garantir a conformidade legal para Smartphones e Tablets (em vigor desde Junho 2025).")
     c1, c2 = st.columns(2)
     with c1:
         st.markdown("### ⚖️ Requisitos Legais")
-        st.write("- Eficiência Energética (A-G)\n- Índice de Reparabilidade (A-E)\n- Durabilidade da Bateria\n- Resistência a quedas/pó")
+        st.write("- Eficiência Energética (A-G)\n- Índice de Reparabilidade (A-E)\n- Durabilidade da Bateria")
     with c2:
         st.markdown("### 🚀 Praticidade")
-        st.write("- Impressão em escala real\n- Acesso Mobile Cloud\n- Gestão Centralizada Etiquetas Energéticas")
+        st.write("- Impressão em escala real\n- Acesso Mobile Cloud\n- Gestão Centralizada")
 
 # --- ABA 1: GALERIA ---
 with abas[1]:
@@ -155,9 +148,9 @@ with abas[1]:
 with abas[2]:
     st.markdown("### Preparar Folha de Impressão")
     ca, cb, cc = st.columns(3)
-    with ca: c1 = st.text_input("Código 1", key="prn1")
-    with cb: c2 = st.text_input("Código 2", key="prn2")
-    with cc: c3 = st.text_input("Código 3", key="prn3")
+    with ca: c1 = st.text_input("Código 1", key="imp1")
+    with cb: c2 = st.text_input("Código 2", key="imp2")
+    with cc: c3 = st.text_input("Código 3", key="imp3")
     if st.button("🖨️ Gerar e Imprimir"):
         cods = [c.strip() for c in [c1, c2, c3] if c.strip()]
         if cods:
@@ -165,40 +158,34 @@ with abas[2]:
             if lista: st.components.v1.html(imprimir_direto_html(lista), height=0, width=0)
             else: st.error("Códigos não encontrados.")
 
-# --- ABAS EXCLUSIVAS ADMIN ---
+# --- ABAS ADMIN ---
 if st.session_state.admin_mode:
     # --- ABA 3: REGISTO ---
     with abas[3]:
-        st.markdown("### Novo Registo Administrativo")
+        st.markdown("### Novo Registo")
         r1, r2 = st.columns([1, 2])
-        with r1: n_cod = st.text_input("Código Sirius", key="reg_c")
+        with r1: n_cod = st.text_input("Código Produto", key="reg_c")
         with r2: n_des = st.text_input("Descrição / Modelo", key="reg_d")
-        n_img = st.file_uploader("Upload da Imagem", type=['jpg','png','jpeg'])
+        n_img = st.file_uploader("Upload da Etiqueta", type=['jpg','png','jpeg'])
         if st.button("🚀 Gravar Dados"):
             if n_cod and n_img:
-                if upload_para_nuvem(n_img, n_cod, n_des): st.success("Gravado com sucesso!"); st.rerun()
-            else: st.warning("Dados obrigatórios em falta.")
+                if upload_para_nuvem(n_img, n_cod, n_des): st.success("Gravado!"); st.rerun()
+            else: st.warning("Preencha todos os campos.")
 
-    # --- ABA 4: EDITAR (PESQUISA DIRETA) ---
+    # --- ABA 4: EDITAR ---
     with abas[4]:
-        st.markdown("### Editar Metadados por Código")
-        cod_procura = st.text_input("Introduza o Código Sirius para editar:", placeholder="Ex: ABC12345")
-        
+        st.markdown("### Atualizar Dados por Código")
+        cod_procura = st.text_input("Introduza o Código para editar:", placeholder="Ex: ABC12345")
         if cod_procura:
             res_edit = supabase.table("etiquetas").select("*").eq("codigo", cod_procura).execute()
             if res_edit.data:
-                dados_atuais = res_edit.data[0]
-                st.success(f"Registo localizado: ID {dados_atuais['id']}")
-                with st.form("form_edicao_direta"):
-                    ed_codigo = st.text_input("Código Sirius", value=dados_atuais['codigo'])
-                    ed_desc = st.text_input("Descrição / Modelo", value=dados_atuais.get('descricao', ''))
-                    if st.form_submit_button("✅ Guardar Alterações"):
-                        if verificar_codigo_existente(ed_codigo, excluir_id=dados_atuais['id']):
-                            st.error("Erro: Código já em uso noutro registo.")
-                        else:
-                            supabase.table("etiquetas").update({"codigo": ed_codigo, "descricao": ed_desc}).eq("id", dados_atuais['id']).execute()
-                            st.success("Dados atualizados com sucesso!"); st.rerun()
-            else:
-                st.warning("Nenhum registo encontrado com este código.")
+                dados = res_edit.data[0]
+                with st.form("edit_form"):
+                    ed_codigo = st.text_input("Código", value=dados['codigo'])
+                    ed_desc = st.text_input("Descrição", value=dados.get('descricao', ''))
+                    if st.form_submit_button("✅ Guardar"):
+                        supabase.table("etiquetas").update({"codigo": ed_codigo, "descricao": ed_desc}).eq("id", dados['id']).execute()
+                        st.success("Atualizado!"); st.rerun()
+            else: st.warning("Não encontrado.")
 
 
