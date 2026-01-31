@@ -210,17 +210,18 @@ with abas[0]:
     st.markdown("""
         <div class="landing-hero">
             <h1>Projeto EcoPrint</h1>
-            <p>Plataforma Centralizada para Impressão e Gestão SIRIUS</p>
+            <p>Plataforma Centralizada para Impressão</p>
+            <p>Etiquetas de Eficiência Energética</p>
         </div>
     """, unsafe_allow_html=True)
     
     c1, c2 = st.columns(2)
     with c1:
         st.markdown("### 🎯 Finalidade")
-        st.write("O **EcoPrint** visa otimizar o processo de etiquetagem energética, permitindo o acesso imediato a etiquetas normalizadas através da nuvem, eliminando erros de escala e facilitando a mobilidade dos técnicos.")
+        st.write("O **EcoPrint** foi uma solução criada para facilitar o acesso e impressão de etiquetas de eficiência energética em dispositivos móveis, ao abrigo dos Regulamentos UE 2023/1670 e 2023/1669, desde junho de 2025.")
     with c2:
         st.markdown("### 🚀 Funcionamento")
-        st.write("1. **Localize** o código SIRIUS na Galeria.\n2. **Introduza** o código na aba de Impressão.\n3. **Imprima** diretamente em A4 com medidas reais (6.5cm x 13.5cm).")
+        st.write("1. **Introduza** o código na aba de Impressão.\n2. **Imprima** diretamente em A4 com medidas reais (6.5cm x 13.5cm).")
 
 # --- ABA 1: GALERIA ---
 with abas[1]:
@@ -280,5 +281,6 @@ if st.session_state.admin_mode:
                         st.rerun()
             else:
                 st.warning("Código e imagem são obrigatórios.")
+
 
 
