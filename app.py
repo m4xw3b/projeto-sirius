@@ -133,7 +133,7 @@ with abas[0]:
         st.write("- Eficiência Energética (A-G)\n- Índice de Reparabilidade (A-E)\n- Durabilidade da Bateria\n- Resistência a quedas/pó")
     with c2:
         st.markdown("### 🚀 Praticidade")
-        st.write("- Impressão em escala real\n- Acesso Mobile Cloud\n- Gestão Centralizada SIRIUS")
+        st.write("- Impressão em escala real\n- Acesso Mobile Cloud\n- Gestão Centralizada Etiquetas Energéticas")
 
 # --- ABA 1: GALERIA ---
 with abas[1]:
@@ -200,4 +200,5 @@ if st.session_state.admin_mode:
                             st.success("Dados atualizados com sucesso!"); st.rerun()
             else:
                 st.warning("Nenhum registo encontrado com este código.")
+
 
