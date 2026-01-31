@@ -115,7 +115,7 @@ with st.sidebar:
     st.divider()
     st.markdown('<div class="sidebar-footer">Projeto desenvolvido por <b>M4xW3b</b><br>📩 <i>geral@wintech.pt</i></div>', unsafe_allow_html=True)
 
-st.subheader("🏷️ Gestão de Etiquetas SIRIUS")
+st.subheader("🏷️ Gestão de Etiquetas Eficiência Energética")
 
 # Abas Dinâmicas
 if st.session_state.admin_mode:
@@ -200,3 +200,4 @@ if st.session_state.admin_mode:
                             st.success("Dados atualizados com sucesso!"); st.rerun()
             else:
                 st.warning("Nenhum registo encontrado com este código.")
+
