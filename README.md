@@ -27,24 +27,6 @@ Design: CSS3 Customizado para dispositivos móveis.
 
 Deploy: Streamlit Cloud integrado com GitHub.
 
-📦 Configuração e Instalação
-Para correr este projeto localmente ou fazer deploy na sua própria infraestrutura:
-
-Clonar o repositório:
-
-Bash
-git clone https://github.com/teu-utilizador/ecoprint-mobile.git
-cd ecoprint-mobile
-Instalar dependências:
-
-Bash
-pip install -r requirements.txt
-Configurar Segredos (.streamlit/secrets.toml):
-
-Ini, TOML
-SUPABASE_URL = "a_tua_url_do_supabase"
-SUPABASE_KEY = "a_tua_chave_api_anon"
-PASSWORD_ADMIN = "a_tua_password_de_gestao"
 ⚖️ Conformidade e Medidas de Impressão
 O sistema força via CSS que cada etiqueta impressa mantenha as proporções legais exigidas. Ao imprimir, certifique-se de:
 
