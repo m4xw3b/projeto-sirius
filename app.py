@@ -10,7 +10,7 @@ try:
     SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
     ADMIN_PASSWORD = st.secrets["PASSWORD_ADMIN"]
 except KeyError:
-    st.error("Erro: Segredos não configurados no Streamlit Cloud. Verifique o painel Secrets.")
+    st.error("Erro: Segredos não configurados no Streamlit Cloud.")
     st.stop()
 
 # Inicializa o cliente Supabase
@@ -36,73 +36,24 @@ def logout():
 def aplicar_design():
     st.markdown("""
         <style>
-        /* Centralização da Sidebar */
-        [data-testid="stSidebarUserContent"] > div:first-child {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* Input de Password */
-        div[data-testid="stSidebar"] div[data-baseweb="input"] {
-            border: 2px solid #007bff !important;
-            border-radius: 10px !important;
-            width: 180px !important;
-            margin: 0 auto !important;
-        }
-
-        /* Botões da Sidebar */
-        [data-testid="stSidebar"] .stButton {
-            display: flex;
-            justify-content: center;
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        [data-testid="stSidebar"] .stButton button {
-            width: auto !important;
-            padding: 0 20px !important;
-        }
-
-        /* Rodapé Fixo */
-        .sidebar-footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background-color: #f8f9fa;
-            border-top: 1px solid #ddd;
-            padding: 15px 0;
-            text-align: center;
-            font-size: 12px;
-            color: #666;
-            z-index: 999;
-        }
-
-        /* Cards da Galeria */
-        .galeria-card {
-            border: 1px solid #e0e0e0;
-            border-radius: 10px;
-            padding: 10px;
-            background-color: white;
-            text-align: center;
-            margin-bottom: 20px;
-            min-height: 320px;
-        }
-
-        /* Landing Page Hero */
-        .landing-hero {
-            background: linear-gradient(90deg, #007bff, #00c6ff);
-            color: white;
-            padding: 40px;
-            border-radius: 15px;
-            margin-bottom: 25px;
-            text-align: center;
-        }
+        /* Centralização da Sidebar e Estilo de Inputs */
+        [data-testid="stSidebarUserContent"] > div:first-child { display: flex; flex-direction: column; align-items: center; }
+        div[data-testid="stSidebar"] div[data-baseweb="input"] { border: 2px solid #007bff !important; border-radius: 10px !important; width: 180px !important; margin: 0 auto !important; }
+        [data-testid="stSidebar"] .stButton { display: flex; justify-content: center; width: 100%; margin-top: 10px; }
+        [data-testid="stSidebar"] .stButton button { width: auto !important; padding: 0 20px !important; }
+        
+        /* Rodapé Fixo na Sidebar */
+        .sidebar-footer { position: fixed; bottom: 0; left: 0; width: 100%; background-color: #f8f9fa; border-top: 1px solid #ddd; padding: 15px 0; text-align: center; font-size: 12px; color: #666; z-index: 999; }
+        
+        /* Estilo dos Cards da Galeria */
+        .galeria-card { border: 1px solid #e0e0e0; border-radius: 10px; padding: 10px; background-color: white; text-align: center; margin-bottom: 20px; min-height: 320px; }
+        
+        /* Banner da Landing Page */
+        .landing-hero { background: linear-gradient(90deg, #004aad, #00c6ff); color: white; padding: 40px; border-radius: 15px; margin-bottom: 25px; text-align: center; }
         </style>
     """, unsafe_allow_html=True)
 
-# --- 4. FUNÇÕES DE SUPORTE ---
+# --- 4. FUNÇÕES DE SUPORTE E LÓGICA DE DADOS ---
 def verificar_codigo_existente(codigo):
     res = supabase.table("etiquetas").select("codigo").eq("codigo", codigo).execute()
     return len(res.data) > 0
@@ -112,22 +63,23 @@ def upload_para_nuvem(imagem_file, codigo, descricao):
         if verificar_codigo_existente(codigo):
             st.error(f"❌ Erro: O código '{codigo}' já existe na base de dados.")
             return False
-            
+        
         nome_ficheiro = f"{codigo}.jpg"
         conteudo = imagem_file.getvalue()
         
-        # Upload para Storage
+        # Upload para o bucket 'imagens_sirius'
         supabase.storage.from_("imagens_sirius").upload(
-            path=nome_ficheiro, file=conteudo,
+            path=nome_ficheiro, 
+            file=conteudo, 
             file_options={"content-type": "image/jpeg", "upsert": "true"}
         )
         
         url_publica = supabase.storage.from_("imagens_sirius").get_public_url(nome_ficheiro)
         
-        # Inserir na tabela (Certifica-te que a coluna 'descricao' existe no Supabase)
+        # Inserção na tabela 'etiquetas' (colunas: codigo, imagem_url, descricao)
         supabase.table("etiquetas").insert({
             "codigo": codigo, 
-            "imagem_url": url_publica,
+            "imagem_url": url_publica, 
             "descricao": descricao
         }).execute()
         return True
@@ -136,6 +88,7 @@ def upload_para_nuvem(imagem_file, codigo, descricao):
         return False
 
 def imprimir_direto_html(lista_dados):
+    """Gera layout HTML com medidas reais para impressão A4"""
     html_content = """
     <html>
     <head>
@@ -148,8 +101,7 @@ def imprimir_direto_html(lista_dados):
             .legenda { font-family: Arial, sans-serif; font-size: 14pt; font-weight: bold; margin-top: 0.5cm; }
         </style>
     </head>
-    <body>
-        <div class="container">
+    <body><div class="container">
     """
     for item in lista_dados:
         html_content += f"""
@@ -166,10 +118,9 @@ def imprimir_direto_html(lista_dados):
     """
     return html_content
 
-# --- 5. EXECUÇÃO DA INTERFACE ---
+# --- 5. INTERFACE DO UTILIZADOR ---
 aplicar_design()
 
-# --- SIDEBAR ---
 with st.sidebar:
     col_esq, col_logo, col_dir = st.columns([1, 2, 1])
     with col_logo:
@@ -179,7 +130,6 @@ with st.sidebar:
             st.image("https://img.icons8.com/clouds/200/energy-usage.png", width=100)
     
     st.title("EcoPrint Mobile")
-    
     if not st.session_state.admin_mode:
         pwd = st.text_input("Password Admin", type="password")
         if st.button("Ativar Modo Edição"):
@@ -197,9 +147,8 @@ with st.sidebar:
         </div>
     """, unsafe_allow_html=True)
 
-# --- ABAS PRINCIPAIS ---
+# Configuração das Abas
 st.subheader("🏷️ Gestão de Etiquetas de Eficiência Energética")
-
 if st.session_state.admin_mode:
     abas = st.tabs(["🏠 Início", "🖼️ Galeria", "🖨️ Impressão", "📥 Registo"])
 else:
@@ -209,19 +158,33 @@ else:
 with abas[0]:
     st.markdown("""
         <div class="landing-hero">
-            <h1>Projeto EcoPrint</h1>
-            <p>Plataforma Centralizada para Impressão</p>
-            <p>Etiquetas de Eficiência Energética</p>
+            <h1>EcoPrint: Conformidade Legal 2026</h1>
+            <p>Implementação dos Regulamentos UE 2023/1670 e 2023/1669</p>
         </div>
     """, unsafe_allow_html=True)
     
+    st.info("""
+    **Finalidade:** Este sistema responde à obrigatoriedade legal de etiquetagem energética para Smartphones e Tablets, 
+    em vigor desde **20 de junho de 2025**. O EcoPrint facilita a exibição visível no ponto de venda das classes de eficiência, 
+    reparabilidade e durabilidade exigidas pela União Europeia.
+    """)
+
     c1, c2 = st.columns(2)
     with c1:
-        st.markdown("### 🎯 Finalidade")
-        st.write("O **EcoPrint** foi uma solução criada para facilitar o acesso e impressão de etiquetas de eficiência energética em dispositivos móveis, ao abrigo dos Regulamentos UE 2023/1670 e 2023/1669, desde junho de 2025.")
+        st.markdown("### ⚖️ O que a Lei exige")
+        st.write("""
+        - **Escala A a G:** Eficiência Energética.
+        - **Índice de Reparabilidade:** Pontuação de A a E.
+        - **Dados de Bateria:** Ciclos de carga e durabilidade.
+        - **Robustez:** Resistência a quedas e água.
+        """)
     with c2:
-        st.markdown("### 🚀 Funcionamento")
-        st.write("1. **Introduza** o código na aba de Impressão.\n2. **Imprima** diretamente em A4 com medidas reais (6.5cm x 13.5cm).")
+        st.markdown("### 🚀 Método Operacional")
+        st.write("""
+        1. **Consulta:** Encontre o equipamento na Galeria.
+        2. **Impressão:** Use a aba dedicada para gerar o layout.
+        3. **Mobilidade:** Imprima a partir de qualquer telemóvel para a impressora da loja.
+        """)
 
 # --- ABA 1: GALERIA ---
 with abas[1]:
@@ -231,11 +194,10 @@ with abas[1]:
         cols = st.columns(3)
         for idx, item in enumerate(res_galeria.data):
             with cols[idx % 3]:
-                descricao = item.get('descricao', 'Sem descrição disponível')
                 st.markdown(f"""<div class='galeria-card'>
                     <img src='{item['imagem_url']}' style='width:100%; border-radius:5px;'>
                     <p style='margin-top:10px; font-weight:bold; color:#007bff; margin-bottom:2px;'>{item['codigo']}</p>
-                    <p style='font-size:0.85em; color:#666;'>{descricao}</p>
+                    <p style='font-size:0.85em; color:#666;'>{item.get('descricao', 'S/ Descrição')}</p>
                 </div>""", unsafe_allow_html=True)
                 if st.session_state.admin_mode:
                     if st.button(f"Eliminar {item['codigo']}", key=f"del_{item['id']}"):
@@ -244,43 +206,40 @@ with abas[1]:
 
 # --- ABA 2: IMPRESSÃO ---
 with abas[2]:
-    st.markdown("### Preparar Folha A4")
-    col_a, col_b, col_c = st.columns(3)
-    with col_a: c1 = st.text_input("Código 1", key="prn1")
-    with col_b: c2 = st.text_input("Código 2", key="prn2")
-    with col_c: c3 = st.text_input("Código 3", key="prn3")
+    st.markdown("### Preparar Impressão (A4 Paisagem)")
+    cola, colb, colc = st.columns(3)
+    with cola: c1 = st.text_input("Código 1", key="p1")
+    with colb: c2 = st.text_input("Código 2", key="p2")
+    with colc: c3 = st.text_input("Código 3", key="p3")
     
-    if st.button("🖨️ Abrir Janela de Impressão"):
-        cods_selecionados = [c.strip() for c in [c1, c2, c3] if c.strip()]
-        if cods_selecionados:
-            lista_final = []
-            for cod in cods_selecionados:
+    if st.button("🖨️ Gerar e Imprimir"):
+        cods = [c.strip() for c in [c1, c2, c3] if c.strip()]
+        if cods:
+            dados_imp = []
+            for cod in cods:
                 r = supabase.table("etiquetas").select("*").eq("codigo", cod).execute()
-                if r.data: lista_final.append(r.data[0])
+                if r.data: dados_imp.append(r.data[0])
             
-            if lista_final:
-                st.components.v1.html(imprimir_direto_html(lista_final), height=0, width=0)
-                st.success("A preparar layout...")
+            if dados_imp:
+                st.components.v1.html(imprimir_direto_html(dados_imp), height=0, width=0)
+                st.info("A processar janela de impressão...")
             else:
-                st.error("Nenhum dos códigos introduzidos foi encontrado.")
+                st.error("Nenhum código encontrado.")
 
 # --- ABA 3: REGISTO (ADMIN) ---
 if st.session_state.admin_mode:
     with abas[3]:
-        st.markdown("### Novo Registo de Etiqueta")
-        reg_c1, reg_c2 = st.columns([1, 2])
-        with reg_c1: novo_cod = st.text_input("Código Sirius")
-        with reg_c2: nova_desc = st.text_input("Descrição / Equipamento")
-        nova_img = st.file_uploader("Upload da Imagem", type=['jpg','jpeg','png'])
+        st.markdown("### Novo Registo Administrativo")
+        reg1, reg2 = st.columns([1, 2])
+        with reg1: n_cod = st.text_input("Código Sirius")
+        with reg2: n_desc = st.text_input("Descrição do Equipamento")
+        n_img = st.file_uploader("Selecionar Etiqueta", type=['jpg','jpeg','png'])
         
-        if st.button("🚀 Gravar Dados"):
-            if novo_cod and nova_img:
-                with st.spinner("A validar e processar..."):
-                    if upload_para_nuvem(nova_img, novo_cod, nova_desc):
-                        st.success("Registo concluído!")
+        if st.button("🚀 Gravar na Base de Dados"):
+            if n_cod and n_img:
+                with st.spinner("A processar..."):
+                    if upload_para_nuvem(n_img, n_cod, n_desc):
+                        st.success("Registo efetuado com sucesso!")
                         st.rerun()
             else:
-                st.warning("Código e imagem são obrigatórios.")
-
-
-
+                st.warning("O código e a imagem são obrigatórios.")
